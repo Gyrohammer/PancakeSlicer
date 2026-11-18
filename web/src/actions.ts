@@ -273,8 +273,21 @@ export function pickModelFiles(onFiles: (files: FileList) => unknown) {
   const input = document.createElement('input');
   input.type = 'file';
   input.multiple = true;
-  input.accept = ['stl', 'obj', '3mf', 'step', 'stp'].flatMap((e) => [`.${e}`, `.${e.toUpperCase()}`]).join(',');
-  input.onchange = () => input.files && void onFiles(input.files);
+  input.hidden = true;
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!ios) input.accept = ['stl', 'obj', '3mf', 'step', 'stp'].flatMap((e) => [`.${e}`, `.${e.toUpperCase()}`]).join(',');
+  input.onchange = async () => {
+    try {
+      if (input.files?.length) await onFiles(input.files);
+    } catch (e) {
+      toast('couldnt_load', { name: [...(input.files ?? [])].map((f) => f.name).join(', '), detail: e instanceof Error ? e.message : String(e) });
+    } finally {
+      input.remove();
+    }
+  };
+  input.oncancel = () => input.remove();
+  document.body.appendChild(input);
   input.click();
 }
 
