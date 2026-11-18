@@ -382,6 +382,7 @@ html.orca-parity, :where(.orca-parity) body, :where(.orca-parity) #root { margin
 :where(.orca-parity) .opt-line.search-flash { animation: search-flash 2s ease-out; border-radius: 3px; }
 :where(.orca-parity) .canvas-tip { position: absolute; z-index: 5; padding: 3px 6px; background: var(--panel); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--r-2); font-size: 12px; pointer-events: none; white-space: normal; }
 :where(.orca-parity) .object-info { position: absolute; z-index: 4; left: 110px; bottom: 12px; max-width: 320px; padding: 6px 10px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-3); font-size: 12px; line-height: 1.5; pointer-events: auto; }
+:where(.orca-parity) .canvas-area canvas { -webkit-touch-callout: none; user-select: none; }
 :where(.orca-parity) .canvas-area canvas:focus { outline: none; }
 :where(.orca-parity) [data-focus-ring]:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
 :where(.orca-parity) .copyable { border: 0; padding: 0; margin: 0; background: none; color: inherit; font: inherit; cursor: copy; user-select: text; border-radius: 2px; }

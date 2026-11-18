@@ -1534,10 +1534,30 @@ void main() {
       setState({ contextMenu: { x: ev.clientX || r.left + r.width / 2, y: ev.clientY || r.top + r.height / 2,
         object: selected?.object, instance: selected?.instance, volume: selected?.volume } });
     };
+    let press: { id: number; x: number; y: number; timer: ReturnType<typeof setTimeout> } | null = null;
+    const cancelPress = () => { if (press) { clearTimeout(press.timer); press = null; } };
+    const onPressDown = (ev: PointerEvent) => {
+      cancelPress();
+      if (ev.pointerType !== 'touch' || !ev.isPrimary || touches.size > 1 || tc.dragging || (tc as unknown as { axis: string | null }).axis) return;
+      press = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, timer: setTimeout(() => {
+        press = null;
+        if (tc.dragging || (tc as unknown as { axis: string | null }).axis) return;
+        rightTime = performance.now();
+        openMenu(ev);
+      }, 450) };
+    };
+    const onPressMove = (ev: PointerEvent) => {
+      if (press && ev.pointerId === press.id && Math.hypot(ev.clientX - press.x, ev.clientY - press.y) > 8) cancelPress();
+    };
+    const onPressUp = (ev: PointerEvent) => { if (press && ev.pointerId === press.id) cancelPress(); };
     window.addEventListener('pointermove', onRightMove);
     window.addEventListener('pointerup', onRightUp);
     renderer.domElement.dataset.customContext = 'orca';
     renderer.domElement.addEventListener('contextmenu', onContextMenu);
+    renderer.domElement.addEventListener('pointerdown', onPressDown);
+    window.addEventListener('pointermove', onPressMove);
+    window.addEventListener('pointerup', onPressUp);
+    window.addEventListener('pointercancel', onPressUp);
     controls.addEventListener('start', () => {
       orbiting = true;
       onLeave();
@@ -1755,6 +1775,10 @@ void main() {
       window.removeEventListener('pointermove', onRightMove);
       window.removeEventListener('pointerup', onRightUp);
       window.removeEventListener('pointercancel', onTouchUp);
+      window.removeEventListener('pointermove', onPressMove);
+      window.removeEventListener('pointerup', onPressUp);
+      window.removeEventListener('pointercancel', onPressUp);
+      cancelPress();
       cancelAnimationFrame(hoverFrame);
       ro.disconnect();
       tools.send({ type: 'RELEASE' });
